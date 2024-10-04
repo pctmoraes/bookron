@@ -25,8 +25,7 @@ class UserController:
         self.db.commit()
         self.db.refresh(user)
 
-        return {"success": True, "detail": "User created successfully"}
-        
+        return {"success": True, "detail": "User created successfully"}  
 
     def get(self, email: str):
         user = self.db.query(UserModel).filter(UserModel.email == email).first()
@@ -44,5 +43,17 @@ class UserController:
             except Exception as e:
                 self.db.rollback()
                 raise HTTPException(status_code=500, detail=f"Error updating user, {e}")
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+
+    def delete(self, user: UserSchema):
+        if existing_user := self.get(user.email):
+            try:
+                self.db.delete(existing_user)
+                self.db.commit()
+                return {"success": True, "detail": "User deleted successfully"}
+            except Exception as e:
+                self.db.rollback()
+                raise HTTPException(status_code=500, detail=f"Error deleting user, {e}")
         else:
             raise HTTPException(status_code=404, detail="User not found")

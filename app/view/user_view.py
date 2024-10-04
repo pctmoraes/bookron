@@ -44,4 +44,15 @@ def update(
         raise e
     except Exception as e:
         raise HTTPException(400, detail=str(e))
-    
+
+@route.delete('/delete')
+def delete(
+    user: User,
+    user_controller: UserController = Depends(get_user_controller)
+):
+    try:
+        return user_controller.delete(user)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(400, detail=str(e))
