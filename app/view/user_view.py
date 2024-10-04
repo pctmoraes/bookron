@@ -32,3 +32,16 @@ def get(
         raise HTTPException(404, detail="User not found")
     except Exception as e:
         raise HTTPException(400, detail=str(e))
+
+@route.put('/update')
+def update(
+    user: User,
+    user_controller: UserController = Depends(get_user_controller)
+):
+    try:
+        return user_controller.update(user)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(400, detail=str(e))
+    

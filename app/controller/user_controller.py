@@ -31,3 +31,18 @@ class UserController:
     def get(self, email: str):
         user = self.db.query(UserModel).filter(UserModel.email == email).first()
         return user
+
+    def update(self, user: UserSchema):
+        if existing_user := self.get(user.email):
+            hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+
+            existing_user.name = user.name
+            existing_user.password = hashed_password.decode('utf-8')
+            try:
+                self.db.commit()
+                return {"success": True, "detail": "User updated successfully"}
+            except Exception as e:
+                self.db.rollback()
+                raise HTTPException(status_code=500, detail=f"Error updating user, {e}")
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
