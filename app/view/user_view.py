@@ -15,11 +15,9 @@ def create(
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
-        user = user_controller.create(user)
-        
-        if user:
-            return {"success": True, "detail": "User created successfully"}
-        return {"success": False, "detail": "User creation failed"}
+        return user_controller.create(user)
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
@@ -29,7 +27,8 @@ def get(
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
-        user = user_controller.get(email)
-        return user
+        if user := user_controller.get(email):
+            return {"success": True, "user name": user.name}
+        raise HTTPException(404, detail="User not found")
     except Exception as e:
         raise HTTPException(400, detail=str(e))
