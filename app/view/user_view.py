@@ -30,6 +30,18 @@ def get(
         if user := user_controller.get(email):
             return {"success": True, "user name": user.name}
         raise HTTPException(404, detail="User not found")
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(400, detail=str(e))
+
+@route.get('/users/list')
+def get_all(
+    user_controller: UserController = Depends(get_user_controller)
+):
+    try:
+        users = user_controller.get_all()
+        return {"success": True, "users": users}
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 

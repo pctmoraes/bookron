@@ -31,6 +31,11 @@ class UserController:
         user = self.db.query(UserModel).filter(UserModel.email == email).first()
         return user
 
+    def get_all(self):
+        users = self.db.query(UserModel.name, UserModel.email).all()
+        users_list = [{"name": user[0], "email": user[1]} for user in users]
+        return users_list
+
     def update(self, user: UserSchema):
         if existing_user := self.get(user.email):
             hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
