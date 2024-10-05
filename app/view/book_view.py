@@ -12,7 +12,7 @@ def get_book_controller(db: Session = Depends(get_db)) -> BookController:
 
 @route.post('/create')
 def create(
-    book: Annotated[Book, Query()] = ...,
+    book: Annotated[Book, Query()],
     book_controller: BookController = Depends(get_book_controller)
 ):
     try:

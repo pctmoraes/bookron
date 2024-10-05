@@ -9,4 +9,4 @@ class Book(BaseModel):
     isbn: str = Field(min_length=13)
     title: str = Field(min_length=1)
     author: str = Field(min_length=3)
-    publish_year: int = Field(gt=0)
+    publish_year: int = Field(default=0)
