@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Annotated
+from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from sqlalchemy.orm import Session
 from app.database.schema import User
 from app.controller.user_controller import UserController
@@ -11,7 +12,7 @@ def get_user_controller(db: Session = Depends(get_db)) -> UserController:
 
 @route.post('/create')
 def create(
-    user: User,
+    user: Annotated[User, Query()] = ...,
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
@@ -23,7 +24,7 @@ def create(
 
 @route.get('/{email}')
 def get(
-    email: str,
+    email: str = Path(regex=r'^\S+@\S+\.\S+$'),
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
@@ -47,7 +48,7 @@ def get_all(
 
 @route.put('/update')
 def update(
-    user: User,
+    user: Annotated[User, Query()] = ...,
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
@@ -59,7 +60,7 @@ def update(
 
 @route.delete('/delete')
 def delete(
-    user: User,
+    user: Annotated[User, Query()] = ...,
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
