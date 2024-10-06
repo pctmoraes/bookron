@@ -60,11 +60,11 @@ def update(
 
 @route.delete('/delete')
 def delete(
-    book: Annotated[Book, Query()] = ...,
+    isbn: Annotated[str, Query(min_length=13)] = ...,
     book_controller: BookController = Depends(get_book_controller)
 ):
     try:
-        return book_controller.delete(book)
+        return book_controller.delete(isbn)
     except HTTPException as e:
         raise e
     except Exception as e:

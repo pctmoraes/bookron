@@ -60,11 +60,11 @@ def update(
 
 @route.delete('/delete')
 def delete(
-    user: Annotated[User, Query()] = ...,
+    email: Annotated[str, Query(regex=r'^\S+@\S+\.\S+$')] = ...,
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
-        return user_controller.delete(user)
+        return user_controller.delete(email)
     except HTTPException as e:
         raise e
     except Exception as e:

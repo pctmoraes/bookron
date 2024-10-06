@@ -51,8 +51,8 @@ class UserController:
         else:
             raise HTTPException(status_code=404, detail="User not found")
 
-    def delete(self, user: UserSchema):
-        if existing_user := self.get(user.email):
+    def delete(self, email: str):
+        if existing_user := self.get(email):
             try:
                 self.db.delete(existing_user)
                 self.db.commit()

@@ -37,7 +37,7 @@ class BookController:
         return book
 
     def get_all(self):
-        books = self.db.query(BookModel).order_by(BookModel.publish_year.asc()).all()
+        books = self.db.query(BookModel).all()
         books_list = [
             {
                 "isbn": book.isbn,
@@ -64,8 +64,8 @@ class BookController:
         else:
             raise HTTPException(status_code=404, detail="Book not found")
 
-    def delete(self, book: BookSchema):
-        if existing_book := self.get(book.isbn):
+    def delete(self, isbn: str):
+        if existing_book := self.get(isbn):
             try:
                 self.db.delete(existing_book)
                 self.db.commit()
