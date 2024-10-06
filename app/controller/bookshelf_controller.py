@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.model.bookshelf import Bookshelf
 from app.database.schema import Bookshelf as BookshelfSchema
 from app.model.book import Book
+from app.util.constants import ALPHABET_TITLE, ALPHABET_AUTHOR
 
 
 class BookshelfController:
@@ -31,19 +32,24 @@ class BookshelfController:
 
         return book
 
-    def retrieve_bookshelf(self, user_email: str, filter: int):
-        bookshelf = self.db.query(Book) \
-            .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
-            .filter(Bookshelf.user_email == user_email)
+    def retrieve_bookshelf(self, user_email: str, filter: int):        
+        if not filter: # chronological order
+            bookshelf = self.db.query(Book) \
+                .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
+                .filter(Bookshelf.user_email == user_email) \
+                .order_by(Book.publish_year.asc()).all()
         
-        if not filter:
-            bookshelf.order_by(Book.publish_year.asc()).all()
-        
-        if filter and filter == 1:
-            bookshelf.order_by(Book.title.asc()).all()
+        if filter and filter == ALPHABET_TITLE:
+            bookshelf = self.db.query(Book) \
+                .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
+                .filter(Bookshelf.user_email == user_email) \
+                .order_by(Book.title.asc()).all()
 
-        if filter and filter == 2:
-            bookshelf.order_by(Book.author.asc()).all()
+        if filter and filter == ALPHABET_AUTHOR:
+            bookshelf = self.db.query(Book) \
+                .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
+                .filter(Bookshelf.user_email == user_email) \
+                .order_by(Book.author.asc()).all()
 
         books = [
             {
