@@ -8,3 +8,5 @@ PASSWORD = os.environ.get('DATABASE_PASS')
 DB = os.environ.get('DATABASE_NAME')
 
 DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@localhost/{DB}"
+
+OPENAPI_KEY = os.environ.get('OPENAPI_KEY')
