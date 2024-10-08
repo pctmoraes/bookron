@@ -1,3 +1,4 @@
+import logging
 import bcrypt
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -21,20 +22,32 @@ class UserController:
             password=hashed_password.decode('utf-8')
         )
 
-        self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        try:
+            self.db.add(user)
+            self.db.commit()
+            self.db.refresh(user)
 
-        return {"success": True, "detail": "User created successfully"}  
+            return {"success": True, "detail": "User created successfully"}
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def get(self, email: str):
-        user = self.db.query(UserModel).filter(UserModel.email == email).first()
-        return user
+        try:
+            return self.db.query(UserModel).filter(UserModel.email == email).first()
+        except Exception as e:
+            logging.error(f"Error on get, exc: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def get_all(self):
-        users = self.db.query(UserModel.name, UserModel.email).all()
-        users_list = [{"name": user[0], "email": user[1]} for user in users]
-        return users_list
+        try:
+            users = self.db.query(UserModel.name, UserModel.email).all()
+            users_list = [{"name": user[0], "email": user[1]} for user in users]
+
+            return users_list
+        except Exception as e:
+            logging.error(f"Error on get, exc: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def update(self, user: UserSchema):
         if existing_user := self.get(user.email):
@@ -47,6 +60,7 @@ class UserController:
                 return {"success": True, "detail": "User updated successfully"}
             except Exception as e:
                 self.db.rollback()
+                logging.error(f"Error on update, exc: {e}")
                 raise HTTPException(status_code=500, detail=f"Error updating user, {e}")
         else:
             raise HTTPException(status_code=404, detail="User not found")
@@ -59,6 +73,7 @@ class UserController:
                 return {"success": True, "detail": "User deleted successfully"}
             except Exception as e:
                 self.db.rollback()
-                raise HTTPException(status_code=500, detail=f"Error deleting user, {e}")
+                logging.error(f"Error on delete, exc: {e}")
+                raise HTTPException(status_code=500, detail="Internal Server Error")
         else:
             raise HTTPException(status_code=404, detail="User not found")

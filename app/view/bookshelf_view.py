@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Path, Query
 from sqlalchemy.orm import Session
-from app.database.schema import Bookshelf
+from app.database.schema import Bookshelf, ErrorResponse
 from app.controller.bookshelf_controller import BookshelfController
 from app.database.database import get_db
 
@@ -10,7 +10,7 @@ route = APIRouter(prefix='/bookshelf')
 def get_bookshelf_controller(db: Session = Depends(get_db)) -> BookshelfController:
     return BookshelfController(db)
 
-@route.post('/add_to_shelf')
+@route.post('/add_to_shelf', responses={500: {"model": ErrorResponse}})
 def add_to_shelf(
     bookshelf: Annotated[Bookshelf, Query()] = ...,
     book_controller: BookshelfController = Depends(get_bookshelf_controller)
@@ -22,7 +22,7 @@ def add_to_shelf(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/books')
+@route.get('/books', responses={500: {"model": ErrorResponse}})
 def retrieve_bookshelf(
     user_email: Annotated[str, Query()] = ...,
     filter: Annotated[int, None] = None,
@@ -34,7 +34,7 @@ def retrieve_bookshelf(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.delete('/delete')
+@route.delete('/delete', responses={500: {"model": ErrorResponse}})
 def delete(
     bookshelf: Annotated[Bookshelf, Query()] = ...,
     book_controller: BookshelfController = Depends(get_bookshelf_controller)

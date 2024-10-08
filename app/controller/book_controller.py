@@ -26,28 +26,39 @@ class BookController:
             publish_year=publish_year
         )
 
-        self.db.add(book)
-        self.db.commit()
-        self.db.refresh(book)
+        try:
+            self.db.add(book)
+            self.db.commit()
+            self.db.refresh(book)
 
-        return {"success": True, "detail": "Book created successfully"}  
+            return {"success": True, "detail": "Book created successfully"}
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error") 
 
     def get(self, isbn: str):
-        book = self.db.query(BookModel).filter(BookModel.isbn == isbn).first()
-        return book
+        try:
+            return self.db.query(BookModel).filter(BookModel.isbn == isbn).first()
+        except Exception as e:
+            logging.error(f"Error on get, exc: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def get_all(self):
-        books = self.db.query(BookModel).all()
-        books_list = [
-            {
-                "isbn": book.isbn,
-                "title": book.title,
-                "author": book.author,
-                "publish_year": book.publish_year
-            }
-            for book in books
-        ]
-        return books_list
+        try:
+            books = self.db.query(BookModel).all()
+            books_list = [
+                {
+                    "isbn": book.isbn,
+                    "title": book.title,
+                    "author": book.author,
+                    "publish_year": book.publish_year
+                }
+                for book in books
+            ]
+            return books_list
+        except Exception as e:
+            logging.error(f"Error on get, exc: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def update(self, book: BookSchema):
         if existing_book := self.get(book.isbn):

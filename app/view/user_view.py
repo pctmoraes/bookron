@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from sqlalchemy.orm import Session
-from app.database.schema import User
+from app.database.schema import User, ErrorResponse
 from app.controller.user_controller import UserController
 from app.database.database import get_db
 
@@ -10,7 +10,7 @@ route = APIRouter(prefix='/user')
 def get_user_controller(db: Session = Depends(get_db)) -> UserController:
     return UserController(db)
 
-@route.post('/create')
+@route.post('/create', responses={500: {"model": ErrorResponse}})
 def create(
     user: Annotated[User, Query()] = ...,
     user_controller: UserController = Depends(get_user_controller)
@@ -22,7 +22,7 @@ def create(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/{email}')
+@route.get('/{email}', responses={500: {"model": ErrorResponse}})
 def get(
     email: str = Path(regex=r'^\S+@\S+\.\S+$'),
     user_controller: UserController = Depends(get_user_controller)
@@ -36,7 +36,7 @@ def get(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/users/list')
+@route.get('/users/list', responses={500: {"model": ErrorResponse}})
 def get_all(
     user_controller: UserController = Depends(get_user_controller)
 ):
@@ -46,7 +46,7 @@ def get_all(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.put('/update')
+@route.put('/update', responses={500: {"model": ErrorResponse}})
 def update(
     user: Annotated[User, Query()] = ...,
     user_controller: UserController = Depends(get_user_controller)
@@ -58,7 +58,7 @@ def update(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.delete('/delete')
+@route.delete('/delete', responses={500: {"model": ErrorResponse}})
 def delete(
     email: Annotated[str, Query(regex=r'^\S+@\S+\.\S+$')] = ...,
     user_controller: UserController = Depends(get_user_controller)

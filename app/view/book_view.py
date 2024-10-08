@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Path, Query
 from sqlalchemy.orm import Session
-from app.database.schema import Book
+from app.database.schema import Book, ErrorResponse
 from app.controller.book_controller import BookController
 from app.database.database import get_db
 
@@ -10,7 +10,7 @@ route = APIRouter(prefix='/book')
 def get_book_controller(db: Session = Depends(get_db)) -> BookController:
     return BookController(db)
 
-@route.post('/create')
+@route.post('/create', responses={500: {"model": ErrorResponse}})
 def create(
     book: Annotated[Book, Query()],
     book_controller: BookController = Depends(get_book_controller)
@@ -22,7 +22,7 @@ def create(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/{isbn}')
+@route.get('/{isbn}', responses={500: {"model": ErrorResponse}})
 def get(
     isbn: str = Path(regex=r'^\S+@\S+\.\S+$'),
     book_controller: BookController = Depends(get_book_controller)
@@ -36,7 +36,7 @@ def get(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/books/list')
+@route.get('/books/list', responses={500: {"model": ErrorResponse}})
 def get_all(
     book_controller: BookController = Depends(get_book_controller)
 ):
@@ -46,7 +46,7 @@ def get_all(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.put('/update')
+@route.put('/update', responses={500: {"model": ErrorResponse}})
 def update(
     book: Annotated[Book, Query()] = ...,
     book_controller: BookController = Depends(get_book_controller)
@@ -58,7 +58,7 @@ def update(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.delete('/delete')
+@route.delete('/delete', responses={500: {"model": ErrorResponse}})
 def delete(
     isbn: Annotated[str, Query(min_length=13)] = ...,
     book_controller: BookController = Depends(get_book_controller)

@@ -14,3 +14,6 @@ class Book(BaseModel):
 class Bookshelf(BaseModel):
     book_isbn: str = Field(min_length=13)
     user_email: str = Field(pattern=r'^\S+@\S+\.\S+$')
+
+class ErrorResponse(BaseModel):
+    detail: str
