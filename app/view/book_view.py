@@ -26,7 +26,7 @@ def create(
 
 @route.get('/{isbn}', responses={500: {"model": ErrorResponse}})
 def get(
-    isbn: str = Path(regex=r'^\S+@\S+\.\S+$'),
+    isbn: str = Path(min_length=13),
     book_controller: BookController = Depends(get_book_controller)
 ):
     try:

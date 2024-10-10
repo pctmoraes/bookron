@@ -40,8 +40,8 @@ class BookController:
     def get(self, isbn: str):
         try:
             return self.db.execute(
-                select(BookModel).filter(BookModel.isbn == isbn).first()
-            )
+                select(BookModel).filter(BookModel.isbn == isbn)
+            ).scalar()
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")

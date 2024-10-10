@@ -36,8 +36,8 @@ class BookshelfController:
             return self.db.execute(
                 select(Bookshelf)
                 .filter(Bookshelf.book_isbn == bookshelf.book_isbn)
-                .filter(Bookshelf.user_email == bookshelf.user_email).first()
-            )
+                .filter(Bookshelf.user_email == bookshelf.user_email)
+            ).scalar()
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")

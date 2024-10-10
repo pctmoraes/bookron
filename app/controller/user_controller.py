@@ -36,8 +36,8 @@ class UserController:
     def get(self, email: str):
         try:
             return self.db.execute(
-                select(UserModel).filter(UserModel.email == email).first()
-            )
+                select(UserModel).filter(UserModel.email == email)
+            ).scalar()
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
