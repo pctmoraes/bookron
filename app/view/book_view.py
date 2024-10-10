@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Path, Query
+from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
 from app.database.schema import Book, ErrorResponse
 from app.controller.book_controller import BookController
@@ -36,13 +37,13 @@ def get(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/books/list', responses={500: {"model": ErrorResponse}})
+@route.get('/books/list', response_model=Page[Book], responses={500: {"model": ErrorResponse}})
 def get_all(
     book_controller: BookController = Depends(get_book_controller)
 ):
     try:
         books = book_controller.get_all()
-        return {"success": True, "books": books}
+        return paginate(books)
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 

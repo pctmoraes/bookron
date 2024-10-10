@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 from app.view.user_view import route as user
 from app.view.book_view import route as book
 from app.view.bookshelf_view import route as bookshelf
@@ -12,3 +13,4 @@ def main():
 app.include_router(user)
 app.include_router(book)
 app.include_router(bookshelf)
+add_pagination(app)

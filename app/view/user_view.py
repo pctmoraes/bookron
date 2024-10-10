@@ -1,7 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
+from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
-from app.database.schema import User, ErrorResponse
+from app.database.schema import User, UserResponse, ErrorResponse
 from app.controller.user_controller import UserController
 from app.database.database import get_db
 
@@ -36,13 +37,13 @@ def get(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/users/list', responses={500: {"model": ErrorResponse}})
+@route.get('/users/list', response_model=Page[UserResponse], responses={500: {"model": ErrorResponse}})
 def get_all(
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
         users = user_controller.get_all()
-        return {"success": True, "users": users}
+        return paginate(users)
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 

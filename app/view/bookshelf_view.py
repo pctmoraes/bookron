@@ -1,7 +1,8 @@
 from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends, Path, Query
+from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi_pagination import Page, paginate
 from sqlalchemy.orm import Session
-from app.database.schema import Bookshelf, ErrorResponse
+from app.database.schema import Bookshelf, Book, ErrorResponse
 from app.controller.bookshelf_controller import BookshelfController
 from app.database.database import get_db
 
@@ -22,15 +23,15 @@ def add_to_shelf(
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 
-@route.get('/books', responses={500: {"model": ErrorResponse}})
+@route.get('/books', response_model=Page[Book], responses={500: {"model": ErrorResponse}})
 def retrieve_bookshelf(
     user_email: Annotated[str, Query()] = ...,
     filter: Annotated[int, None] = None,
     bookshelf_controller: BookshelfController = Depends(get_bookshelf_controller)
 ):
     try:
-        shelf = bookshelf_controller.retrieve_bookshelf(user_email, filter)
-        return {"success": True, "books": shelf}
+        bookshelf = bookshelf_controller.retrieve_bookshelf(user_email, filter)
+        return paginate(bookshelf)
     except Exception as e:
         raise HTTPException(400, detail=str(e))
 

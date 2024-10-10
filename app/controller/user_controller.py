@@ -44,7 +44,7 @@ class UserController:
 
     def get_all(self):
         try:
-            return self.db.execute(select(UserModel.name, UserModel.email)).scalars().all()
+            return self.db.execute(select(UserModel)).scalars().all()
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
