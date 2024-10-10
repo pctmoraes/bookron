@@ -3,10 +3,10 @@
 Cadastre seus livros e tenha uma visão cronológica da sua estante.
 <br>
 
-## Instruções para execução dos projetos
+## Instruções para execução do projeto
 ## Pre-requisitos:
 - repositório clonado <br>
-- posgrsql e dbeaver (ou outro SGBD)
+- postgresql e dbeaver (ou outro SGBD)
 - python e pip instalados
 <br>
 
