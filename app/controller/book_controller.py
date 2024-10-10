@@ -1,6 +1,7 @@
 import logging
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from openai import OpenAI
 from app.model.book import Book as BookModel
 from app.database.schema import Book as BookSchema
@@ -38,24 +39,16 @@ class BookController:
 
     def get(self, isbn: str):
         try:
-            return self.db.query(BookModel).filter(BookModel.isbn == isbn).first()
+            return self.db.execute(
+                select(BookModel).filter(BookModel.isbn == isbn).first()
+            )
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def get_all(self):
         try:
-            books = self.db.query(BookModel).all()
-            books_list = [
-                {
-                    "isbn": book.isbn,
-                    "title": book.title,
-                    "author": book.author,
-                    "publish_year": book.publish_year
-                }
-                for book in books
-            ]
-            return books_list
+            return self.db.execute(select(BookModel)).scalars().all()
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")

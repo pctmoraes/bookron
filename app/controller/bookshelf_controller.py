@@ -1,6 +1,7 @@
 import logging
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.model.bookshelf import Bookshelf
 from app.database.schema import Bookshelf as BookshelfSchema
 from app.model.book import Book
@@ -32,45 +33,42 @@ class BookshelfController:
 
     def check_if_book_on_shelf(self, bookshelf: BookshelfSchema):
         try:
-            book = self.db.query(Bookshelf) \
-                .filter(Bookshelf.book_isbn == bookshelf.book_isbn) \
+            return self.db.execute(
+                select(Bookshelf)
+                .filter(Bookshelf.book_isbn == bookshelf.book_isbn)
                 .filter(Bookshelf.user_email == bookshelf.user_email).first()
-
-            return book
+            )
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def retrieve_bookshelf(self, user_email: str, filter: int):
-        try:   
+        try:
             if not filter: # chronological order
-                bookshelf = self.db.query(Book) \
-                    .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
-                    .filter(Bookshelf.user_email == user_email) \
-                    .order_by(Book.publish_year.asc()).all()
-            
+                bookshelf = self.db.execute(
+                    select(Book)
+                    .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)
+                    .filter(Bookshelf.user_email == user_email)
+                    .order_by(Book.publish_year.asc())
+                ).scalars().all()
+
             if filter and filter == ALPHABET_TITLE:
-                bookshelf = self.db.query(Book) \
-                    .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
-                    .filter(Bookshelf.user_email == user_email) \
-                    .order_by(Book.title.asc()).all()
+                bookshelf = self.db.execute(
+                    select(Book)
+                    .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)
+                    .filter(Bookshelf.user_email == user_email)
+                    .order_by(Book.title.asc())
+                ).scalars().all()
 
             if filter and filter == ALPHABET_AUTHOR:
-                bookshelf = self.db.query(Book) \
-                    .join(Bookshelf, Book.isbn == Bookshelf.book_isbn) \
-                    .filter(Bookshelf.user_email == user_email) \
-                    .order_by(Book.author.asc()).all()
+                bookshelf = self.db.execute(
+                    select(Book)
+                    .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)
+                    .filter(Bookshelf.user_email == user_email)
+                    .order_by(Book.author.asc())
+                ).scalars().all()
 
-            books = [
-                {
-                    "title": book.title,
-                    "author": book.author,
-                    "publish_year": book.publish_year
-                }
-                for book in bookshelf
-            ]
-
-            return books
+            return bookshelf
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")

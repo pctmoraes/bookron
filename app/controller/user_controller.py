@@ -2,6 +2,7 @@ import logging
 import bcrypt
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.model.user import User as UserModel
 from app.database.schema import User as UserSchema
 
@@ -34,17 +35,16 @@ class UserController:
 
     def get(self, email: str):
         try:
-            return self.db.query(UserModel).filter(UserModel.email == email).first()
+            return self.db.execute(
+                select(UserModel).filter(UserModel.email == email).first()
+            )
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
     def get_all(self):
         try:
-            users = self.db.query(UserModel.name, UserModel.email).all()
-            users_list = [{"name": user[0], "email": user[1]} for user in users]
-
-            return users_list
+            return self.db.execute(select(UserModel.name, UserModel.email)).scalars().all()
         except Exception as e:
             logging.error(f"Error on get, exc: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
