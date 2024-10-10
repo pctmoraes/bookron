@@ -45,28 +45,28 @@ class BookshelfController:
     def retrieve_bookshelf(self, user_email: str, filter: int):
         try:
             if not filter: # chronological order
-                bookshelf = self.db.execute(
-                    select(Book)
+                bookshelf = (
+                    self.db.query(Book)
                     .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)
                     .filter(Bookshelf.user_email == user_email)
                     .order_by(Book.publish_year.asc())
-                ).scalars().all()
+                )
 
             if filter and filter == ALPHABET_TITLE:
-                bookshelf = self.db.execute(
-                    select(Book)
+                bookshelf = (
+                    self.db.query(Book)
                     .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)
                     .filter(Bookshelf.user_email == user_email)
                     .order_by(Book.title.asc())
-                ).scalars().all()
+                )
 
             if filter and filter == ALPHABET_AUTHOR:
-                bookshelf = self.db.execute(
-                    select(Book)
+                bookshelf = (
+                    self.db.query(Book)
                     .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)
                     .filter(Bookshelf.user_email == user_email)
                     .order_by(Book.author.asc())
-                ).scalars().all()
+                )
 
             return bookshelf
         except Exception as e:
