@@ -2,6 +2,7 @@ import logging
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from openai import OpenAI
 from app.model.book import Book as BookModel
 from app.database.schema import Book as BookSchema
@@ -12,10 +13,7 @@ class BookController:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create(self, book: BookSchema):
-        if existing_book := self.get(book.isbn):
-            raise HTTPException(status_code=409, detail="Book already registered")
-        
+    def create(self, book: BookSchema):        
         publish_year = book.publish_year
         if not publish_year:
             publish_year = self.get_publish_year_with_AI(book)
@@ -30,9 +28,10 @@ class BookController:
         try:
             self.db.add(book)
             self.db.commit()
-            self.db.refresh(book)
 
             return {"success": True, "detail": "Book created successfully"}
+        except IntegrityError:
+            raise HTTPException(status_code=409, detail="Book already registered")
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error") 

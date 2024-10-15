@@ -2,6 +2,7 @@ import logging
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from app.model.bookshelf import Bookshelf
 from app.database.schema import Bookshelf as BookshelfSchema
 from app.model.book import Book
@@ -12,10 +13,7 @@ class BookshelfController:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def add_to_shelf(self, bookshelf: BookshelfSchema):
-        if book_on_shelf := self.check_if_book_on_shelf(bookshelf):
-            raise HTTPException(status_code=409, detail="Book already on shelf")
-        
+    def add_to_shelf(self, bookshelf: BookshelfSchema):        
         bookshelf = Bookshelf(
             book_isbn=bookshelf.book_isbn,
             user_email=bookshelf.user_email
@@ -24,9 +22,10 @@ class BookshelfController:
         try:
             self.db.add(bookshelf)
             self.db.commit()
-            self.db.refresh(bookshelf)
 
             return {"success": True, "detail": "Book added to shelf"}
+        except IntegrityError:
+            raise HTTPException(status_code=409, detail="Book already on shelf")
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
