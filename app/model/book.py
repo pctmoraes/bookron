@@ -11,3 +11,4 @@ class Book(Base):
     title = Column(String(256), nullable=False)
     author = Column(String(50), nullable=False)
     publish_year = Column(Integer, nullable=True)
+    genre = Column(String(50), nullable=True)

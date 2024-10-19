@@ -16,16 +16,19 @@ class BookController:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create(self, book: BookSchema):        
+    def create(self, book: BookSchema):
         publish_year = book.publish_year
-        if not publish_year:
-            publish_year = self.get_publish_year_with_AI(book)
+        genre = book.genre
+
+        if not publish_year or not genre:
+            publish_year = self.get_publish_year_and_genre_with_AI(book)
         
         book = BookModel(
             isbn=book.isbn,
             title=book.title,
             author=book.author,
-            publish_year=publish_year
+            publish_year=publish_year,
+            genre=genre
         )
 
         try:
@@ -91,11 +94,14 @@ class BookController:
         else:
             raise HTTPException(status_code=404, detail="Book not found")
 
-    def get_publish_year_with_AI(self, book: BookSchema):
+    def get_publish_year_and_genre_with_AI(self, book: BookSchema):
         openai = OpenAI(api_key=OPENAPI_KEY)
-        publish_year = 0
-        question = f"When was '{book.title}' by {book.author} published? " \
-            "Please return me only the year, no phrases."
+        publish_year, genre = 0, ""
+
+        question = "Return me in this format publish_year,book_genre " \
+            "(e.g the year a comma and the genre) with no additional data " \
+            f"the publish year and genre of the book {book.title} by author {book.author} " \
+            "and in Brazilian portuguese"
         
         try:
             response = openai.chat.completions.create(
@@ -106,14 +112,19 @@ class BookController:
                 ]
             )
 
-            content = response['choices'][0]['message']['content']
-            if content and content.isdecimal():
-                publish_year = int(content)
-        
+            anwswers = response['choices'][0]['message']['content']
+            anwswers_list = anwswers.split(',')
+            
+            anwswer_publish_year = anwswers_list[0]
+            if anwswer_publish_year and anwswer_publish_year.isdecimal():
+                publish_year = int(anwswer_publish_year)
+            
+            anwswer_genre = anwswers_list[-1]
+            genre = "N/A" if not anwswer_genre else anwswer_genre.capitalize()
         except Exception as e:
             logging.error(
                 f'An exception occurred during openai.chat.completions.create() call. ' \
                 f'Traceback: {e}'
             )
         finally:
-            return publish_year
+            return publish_year, genre
