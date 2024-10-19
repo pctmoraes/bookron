@@ -1,11 +1,14 @@
 import logging
+
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
+from openai import OpenAI
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from openai import OpenAI
-from app.model.book import Book as BookModel
+from sqlalchemy.orm import Session
+
 from app.database.schema import Book as BookSchema
+from app.model.book import Book as BookModel
 from app.util.constants import OPENAPI_KEY
 
 
@@ -29,7 +32,10 @@ class BookController:
             self.db.add(book)
             self.db.commit()
 
-            return {"success": True, "detail": "Book created successfully"}
+            return JSONResponse(
+                content={"success": True, "detail": "Book created successfully"},
+                status_code=201
+            )
         except IntegrityError:
             raise HTTPException(status_code=409, detail="Book already registered")
         except Exception as e:
@@ -60,7 +66,10 @@ class BookController:
 
             try:
                 self.db.commit()
-                return {"success": True, "detail": "Book updated successfully"}
+                return JSONResponse(
+                    content={"success": True, "detail": "Book updated successfully"},
+                    status_code=200
+                )
             except Exception as e:
                 self.db.rollback()
                 raise HTTPException(status_code=500, detail=f"Error updating book, {e}")
@@ -72,7 +81,10 @@ class BookController:
             try:
                 self.db.delete(existing_book)
                 self.db.commit()
-                return {"success": True, "detail": "Book deleted successfully"}
+                return JSONResponse(
+                    content={"success": True, "detail": "Book deleted successfully"},
+                    status_code=200
+                )
             except Exception as e:
                 self.db.rollback()
                 raise HTTPException(status_code=500, detail=f"Error deleting book, {e}")

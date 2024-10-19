@@ -1,12 +1,15 @@
 import logging
+
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from app.model.bookshelf import Bookshelf
+from sqlalchemy.orm import Session
+
 from app.database.schema import Bookshelf as BookshelfSchema
 from app.model.book import Book
-from app.util.constants import ALPHABET_TITLE, ALPHABET_AUTHOR
+from app.model.bookshelf import Bookshelf
+from app.util.constants import ALPHABET_AUTHOR, ALPHABET_TITLE
 
 
 class BookshelfController:
@@ -23,7 +26,10 @@ class BookshelfController:
             self.db.add(bookshelf)
             self.db.commit()
 
-            return {"success": True, "detail": "Book added to shelf"}
+            return JSONResponse(
+                content={"success": True, "detail": "Book added to shelf"},
+                status_code=201
+            )
         except IntegrityError:
             raise HTTPException(status_code=409, detail="Book already on shelf")
         except Exception as e:
@@ -77,7 +83,10 @@ class BookshelfController:
             try:
                 self.db.delete(book_on_shelf)
                 self.db.commit()
-                return {"success": True, "detail": "Book removed from shelf"}
+                return JSONResponse(
+                    content={"success": True, "detail": "Book removed from shelf"},
+                    status_code=200
+                )
             except Exception as e:
                 self.db.rollback()
                 raise HTTPException(status_code=500, detail=f"Error removing book, {e}")

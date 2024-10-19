@@ -1,11 +1,14 @@
 import logging
+
 import bcrypt
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from app.model.user import User as UserModel
+from sqlalchemy.orm import Session
+
 from app.database.schema import User as UserSchema
+from app.model.user import User as UserModel
 
 
 class UserController:
@@ -25,10 +28,12 @@ class UserController:
             self.db.add(user)
             self.db.commit()
 
-            return {"success": True, "detail": "User created successfully"}
+            return JSONResponse(
+                content={"success": True, "detail": "User created successfully"},
+                status_code=201
+            )
         except IntegrityError:
-            raise HTTPException(
-                status_code=409, detail="User already registered")
+            raise HTTPException(status_code=409, detail="User already registered")
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
             raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -57,7 +62,10 @@ class UserController:
             existing_user.password = hashed_password.decode('utf-8')
             try:
                 self.db.commit()
-                return {"success": True, "detail": "User updated successfully"}
+                return JSONResponse(
+                    content={"success": True, "detail": "User updated successfully"},
+                    status_code=200
+                )
             except Exception as e:
                 self.db.rollback()
                 logging.error(f"Error on update, exc: {e}")
@@ -70,7 +78,10 @@ class UserController:
             try:
                 self.db.delete(existing_user)
                 self.db.commit()
-                return {"success": True, "detail": "User deleted successfully"}
+                return JSONResponse(
+                    content={"success": True, "detail": "User deleted successfully"},
+                    status_code=200
+                )
             except Exception as e:
                 self.db.rollback()
                 logging.error(f"Error on delete, exc: {e}")

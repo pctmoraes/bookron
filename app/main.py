@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi_pagination import add_pagination
-from app.view.user_view import route as user
+
 from app.view.book_view import route as book
 from app.view.bookshelf_view import route as bookshelf
+from app.view.user_view import route as user
 
 app = FastAPI()
 
