@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, Field
 
 class User(BaseModel):
@@ -14,7 +15,7 @@ class Book(BaseModel):
     title: str = Field(min_length=1)
     author: str = Field(min_length=3)
     publish_year: int = Field(default=0)
-    genre: str = Field(min_length=3)
+    genre: Optional[str]
 
 class Bookshelf(BaseModel):
     book_isbn: str = Field(min_length=13)
