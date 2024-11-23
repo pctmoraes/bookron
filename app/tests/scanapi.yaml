@@ -1,0 +1,22 @@
+endpoints:
+  - name: "Testing Book endpoints"
+    requests:
+      - name: "list_books"
+        path: "http://127.0.0.1:8000/book/books/list"
+        tests:
+          - name: is_status_code_200
+            assert: ${{ response.status_code == 200 }}
+      - name: "create_book_that_is_already_registered"
+        method: "post"
+        path: "http://127.0.0.1:8000/book/create"
+        params:
+            isbn: "9783109619876"
+            title: "Moby Dick"
+            author: "Herman Melville"
+            publish_year: "1851"
+            genre: "Romance"
+        tests:
+          - name: is_status_code_409
+            assert: ${{ response.status_code == 409 }}
+          - name: is_book_registered
+            assert: ${{ response.json().get("detail") == "Book already registered" }}
