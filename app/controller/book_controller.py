@@ -66,6 +66,7 @@ class BookController:
             existing_book.title = book.title
             existing_book.author = book.author
             existing_book.publish_year = book.publish_year
+            existing_book.genre = book.genre
 
             try:
                 self.db.commit()

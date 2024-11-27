@@ -12,7 +12,7 @@ route = APIRouter(prefix='/bookshelf')
 def get_bookshelf_controller(db: Session = Depends(get_db)) -> BookshelfController:
     return BookshelfController(db)
 
-@route.post('/add_to_shelf', responses={500: {"model": ErrorResponse}})
+@route.post('/add', responses={500: {"model": ErrorResponse}})
 def add_to_shelf(
     bookshelf: Annotated[Bookshelf, Query()] = ...,
     book_controller: BookshelfController = Depends(get_bookshelf_controller)

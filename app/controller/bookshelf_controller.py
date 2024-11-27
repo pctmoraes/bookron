@@ -49,7 +49,7 @@ class BookshelfController:
 
     def retrieve_bookshelf(self, user_email: str, filter: int):
         try:
-            if not filter: # chronological order
+            if not filter or filter > 2: # chronological order
                 bookshelf = (
                     self.db.query(Book)
                     .join(Bookshelf, Book.isbn == Bookshelf.book_isbn)

@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends, Query, Path
+from fastapi import APIRouter, HTTPException, Depends, Query, Path, Body
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
@@ -14,7 +14,7 @@ def get_user_controller(db: Session = Depends(get_db)) -> UserController:
 
 @route.post('/create', responses={500: {"model": ErrorResponse}})
 def create(
-    user: Annotated[User, Query()] = ...,
+    user: Annotated[User, Body()] = ...,
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
@@ -50,7 +50,7 @@ def get_all(
 
 @route.put('/update', responses={500: {"model": ErrorResponse}})
 def update(
-    user: Annotated[User, Query()] = ...,
+    user: Annotated[User, Body()] = ...,
     user_controller: UserController = Depends(get_user_controller)
 ):
     try:
